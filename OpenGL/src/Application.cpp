@@ -1,5 +1,4 @@
 #include "Types.h"
-#include "utilities.cpp"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <assert.h>
@@ -7,51 +6,10 @@
 #include <sstream>
 
 #include "IndexBuffer.h"
+#include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
-
-static u32 compile_shader(u32 type, const std::string &source) {
-    u32 id = glCreateShader(type);
-    const char *src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    int result;
-
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char *message = (char *)alloca(length * sizeof(char));
-
-        glGetShaderInfoLog(id, length, &length, message);
-
-        std::cout << "Failed to Compile" << (type == GL_VERTEX_SHADER ? "Vertex" : "Fragment")
-                  << "Shader!" << std::endl;
-        std::cout << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-static u32 create_shader(const std::string &vertex_shader, const std::string &fragment_shader) {
-    u32 program = glCreateProgram();
-    u32 vs = compile_shader(GL_VERTEX_SHADER, vertex_shader);
-    u32 fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 int main(void) {
     GLFWwindow *window;
@@ -102,30 +60,23 @@ int main(void) {
         va.AddBuffer(vb, layout);
 
         IndexBuffer ib(indices, 6);
+        Shader default_shader("resources/shaders/default_vert.shader",
+                              "resources/shaders/default_frag.shader");
+        default_shader.Bind();
+        default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
 
-        u32 shader =
-            create_shader(Utilities::read_file_to_string("resources/shaders/default_vert.shader"),
-                          Utilities::read_file_to_string("resources/shaders/default_frag.shader"));
-        glUseProgram(shader);
-
-        // Setting up Uniforms
-        int location = glGetUniformLocation(shader, "u_Color");
-        assert(location != -1);
-        glUniform4f(location, 0.1, 0.2, 0.3, 1.0);
-
-        glBindVertexArray(0);
-        glUseProgram(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        va.Unbind();
+        vb.Unbind();
+        ib.Unbind();
+        default_shader.Unbind();
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
             /* Render here */
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glUseProgram(shader);
-            glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
-
+            default_shader.Bind();
+            default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
             va.Bind();
             ib.Bind();
 
@@ -137,8 +88,6 @@ int main(void) {
             /* Poll for and process events */
             glfwPollEvents();
         }
-
-        glDeleteProgram(shader);
     }
 
     glfwTerminate();
