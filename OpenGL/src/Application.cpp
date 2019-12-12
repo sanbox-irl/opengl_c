@@ -11,6 +11,11 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 int main(void) {
     GLFWwindow *window;
@@ -43,10 +48,10 @@ int main(void) {
 
         // Create our OpenGL buffer...
         float positions[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f, // 0
-            0.5f,  -0.5f, 1.0f, 0.0f, // 1
-            0.5f,  0.5f,  1.0f, 1.0f, // 2
-            -0.5f, 0.5f,  0.0f, 1.0f, // 3
+            100.0f, 100.0f, 0.0f, 0.0f, // 0
+            200.0f, 100.0f, 1.0f, 0.0f, // 1
+            200.0f, 200.0f, 1.0f, 1.0f, // 2
+            100.0f, 200.0f, 0.0f, 1.0f, // 3
         };
 
         u32 indices[] = {
@@ -62,17 +67,21 @@ int main(void) {
         VertexBufferLayout layout;
         layout.Push<float>(2);
         layout.Push<float>(2);
-        GLCall(va.AddBuffer(vb, layout));
+        va.AddBuffer(vb, layout);
 
         IndexBuffer ib(indices, 6);
+
+        glm::mat4 proj = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
+
         Shader default_shader("resources/shaders/default_vert.shader",
                               "resources/shaders/default_frag.shader");
-        GLCall(default_shader.Bind());
-        GLCall(default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0));
+        default_shader.Bind();
+        default_shader.SetUniform4f("u_Color", 0.1f, 0.2f, 0.3f, 1.0f);
 
-        Texture texture("resources/textures/link.png");
-        GLCall(texture.Bind());
-        GLCall(default_shader.SetUniform1i("u_Texture", 0));
+        Texture texture("resources/textures/zelda.png");
+        texture.Bind();
+        default_shader.SetUniform1i("u_Texture", 0);
 
         va.Unbind();
         vb.Unbind();
@@ -80,18 +89,40 @@ int main(void) {
         default_shader.Unbind();
 
         Renderer renderer;
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui::StyleColorsDark();
+        ImGuiIO &io = ImGui::GetIO();
+
+        auto translation = glm::vec3(800, 800, 0);
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
             /* Render here */
             renderer.Clear();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-            GLCall(default_shader.Bind());
-            // GLCall(default_shader.SetUniform1i("u_Texture", 0));
+            ImGui::Begin("Edit Model Matrix");
+            ImGui::SliderFloat2("Translation", &translation.x, 0.0f, 1920.0f);
 
-            default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
+            ImGui::End();
 
-            GLCall(renderer.Draw(va, ib, default_shader));
+            // Updating Model Matrix
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+            glm::mat4 mvp = proj * view * model;
+
+            default_shader.Bind();
+            default_shader.SetUniform4f("u_Color", 0.1f, 0.2f, 0.3f, 1.0f);
+            default_shader.SetUniformMat4f("u_MVP", mvp);
+
+            renderer.Draw(va, ib, default_shader);
+
+            ImGui::Render();
+            auto draw_data = ImGui::GetDrawData();
+            ImGui_ImplOpenGL3_RenderDrawData(draw_data);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);

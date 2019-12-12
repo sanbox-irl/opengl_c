@@ -1,5 +1,6 @@
 #pragma once
 #include "Types.h"
+#include "glm/glm.hpp"
 #include <string>
 #include <unordered_map>
 
@@ -14,6 +15,7 @@ class Shader {
     // Set Uniforms
     void SetUniform4f(const std::string &name, float v0, float v1, float v2, float v3);
     void SetUniform1i(const std::string &name, int value);
+    void SetUniformMat4f(const std::string &name, const glm::mat4 &matrix);
 
   private:
     std::string m_VertFpath;
