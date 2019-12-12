@@ -5,17 +5,18 @@
 #include <iostream>
 #include <sstream>
 
-#include "IndexBuffer.h"
-#include "Shader.h"
-#include "Texture.h"
-#include "VertexArray.h"
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "renderer/IndexBuffer.h"
+#include "renderer/Shader.h"
+#include "renderer/Texture.h"
+#include "renderer/VertexArray.h"
+#include "renderer/VertexBuffer.h"
+#include "renderer/VertexBufferLayout.h"
+
 
 int main(void) {
     GLFWwindow *window;
