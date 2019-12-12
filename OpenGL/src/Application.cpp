@@ -1,4 +1,3 @@
-#include "Types.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <assert.h>
@@ -13,10 +12,10 @@
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
 #include "renderer/Texture.h"
+#include "renderer/Types.h"
 #include "renderer/VertexArray.h"
 #include "renderer/VertexBuffer.h"
 #include "renderer/VertexBufferLayout.h"
-
 
 int main(void) {
     GLFWwindow *window;
