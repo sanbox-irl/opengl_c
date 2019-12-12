@@ -17,6 +17,7 @@ Shader::Shader(const std::string &vertex_shader, const std::string &fragment_sha
 
     glDeleteShader(vs);
     glDeleteShader(fs);
+    Unbind();
 }
 Shader::~Shader() { glDeleteProgram(m_RendererID); }
 
@@ -28,17 +29,21 @@ void Shader::SetUniform4f(const std::string &name, float v0, float v1, float v2,
     glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 }
 
+void Shader::SetUniform1i(const std::string &name, int value) {
+    glUniform1i(GetUniformLocation(name), value);
+}
+
 // Private
 int Shader::GetUniformLocation(const std::string &name) {
-    if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) {
-        return m_UniformLocationCache[name];
-    }
+    // if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) {
+    //    return m_UniformLocationCache[name];
+    //}
 
     int location = glGetUniformLocation(m_RendererID, name.c_str());
     if (location == -1) {
         std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;
     }
-    
+
     m_UniformLocationCache[name] = location;
 
     return location;

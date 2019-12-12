@@ -7,6 +7,7 @@
 
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -42,10 +43,10 @@ int main(void) {
 
         // Create our OpenGL buffer...
         float positions[] = {
-            -0.5f, -0.5f, // 0
-            0.5f,  -0.5f, // 1
-            0.5f,  0.5f,  // 2
-            -0.5f, 0.5f,  // 3
+            -0.5f, -0.5f, 0.0f, 0.0f, // 0
+            0.5f,  -0.5f, 1.0f, 0.0f, // 1
+            0.5f,  0.5f,  1.0f, 1.0f, // 2
+            -0.5f, 0.5f,  0.0f, 1.0f, // 3
         };
 
         u32 indices[] = {
@@ -53,34 +54,44 @@ int main(void) {
             2, 3, 0  // triangle1
         };
 
+        // glEnable(GL_BLEND);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         VertexArray va;
-        VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        VertexBuffer vb(positions, 4 * 4 * sizeof(float));
         VertexBufferLayout layout;
         layout.Push<float>(2);
-        va.AddBuffer(vb, layout);
+        layout.Push<float>(2);
+        GLCall(va.AddBuffer(vb, layout));
 
         IndexBuffer ib(indices, 6);
         Shader default_shader("resources/shaders/default_vert.shader",
                               "resources/shaders/default_frag.shader");
-        default_shader.Bind();
-        default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
+        GLCall(default_shader.Bind());
+        GLCall(default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0));
+
+        Texture texture("resources/textures/link.png");
+        GLCall(texture.Bind());
+        GLCall(default_shader.SetUniform1i("u_Texture", 0));
 
         va.Unbind();
         vb.Unbind();
         ib.Unbind();
         default_shader.Unbind();
 
+        Renderer renderer;
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
             /* Render here */
-            glClear(GL_COLOR_BUFFER_BIT);
+            renderer.Clear();
 
-            default_shader.Bind();
-            default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
-            va.Bind();
-            ib.Bind();
+            GLCall(default_shader.Bind());
+            GLCall(default_shader.SetUniform1i("u_Texture", 0));
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            // default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
+
+            GLCall(renderer.Draw(va, ib, default_shader));
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);

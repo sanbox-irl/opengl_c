@@ -1,6 +1,5 @@
 #pragma once
-
-typedef unsigned int u32;
+#include "Types.h"
 
 class IndexBuffer {
   public:

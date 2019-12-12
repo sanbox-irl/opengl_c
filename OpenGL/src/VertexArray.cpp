@@ -1,6 +1,7 @@
 #include "VertexArray.h"
 #include "Renderer.h"
 #include "Types.h"
+#include "VertexBufferLayout.h"
 
 VertexArray::VertexArray() { glGenVertexArrays(1, &m_RendererID); }
 VertexArray::~VertexArray() { glDeleteVertexArrays(1, &m_RendererID); }
