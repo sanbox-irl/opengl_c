@@ -54,8 +54,8 @@ int main(void) {
             2, 3, 0  // triangle1
         };
 
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         VertexArray va;
         VertexBuffer vb(positions, 4 * 4 * sizeof(float));
@@ -87,9 +87,9 @@ int main(void) {
             renderer.Clear();
 
             GLCall(default_shader.Bind());
-            GLCall(default_shader.SetUniform1i("u_Texture", 0));
+            // GLCall(default_shader.SetUniform1i("u_Texture", 0));
 
-            // default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
+            default_shader.SetUniform4f("u_Color", 0.1, 0.2, 0.3, 1.0);
 
             GLCall(renderer.Draw(va, ib, default_shader));
 

@@ -35,9 +35,9 @@ void Shader::SetUniform1i(const std::string &name, int value) {
 
 // Private
 int Shader::GetUniformLocation(const std::string &name) {
-    // if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) {
-    //    return m_UniformLocationCache[name];
-    //}
+    if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) {
+        return m_UniformLocationCache[name];
+    }
 
     int location = glGetUniformLocation(m_RendererID, name.c_str());
     if (location == -1) {
